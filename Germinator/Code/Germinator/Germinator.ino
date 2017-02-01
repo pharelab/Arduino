@@ -8,68 +8,76 @@
 #include <Boards.h>
 #include <LiquidCrystal.h>                               
 
+//#include "LowPower.h"
 #include "DHT.h"
 
 // Définit le type de capteur utilisé
 #define DHTTYPE DHT11
 
 // Pin du capteur DHT11
-#define DHTPIN 3 
+#define DHTPIN A0 
+
+// Water Sensor
+#define WATERPIN  A1
+
+// Moisture Sensor
+#define MOISTUREPIN  A0
 
 // Affectation des bropches sur l"ecran LCD
-#define en 8                                                            
-#define rs 9
-#define d7 13
-#define d6 12
-#define d5 11
-#define d4 10
-
+#define EN 8                                                            
+#define RS 9
+#define D7 2
+#define D6 3
+#define D5 4
+#define D4 5
 
 // Définition de lobjet LCD
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);    
+LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);    
          
 // Définition du capteur DHT11
 DHT dht(DHTPIN, DHTTYPE);
  
 void setup() {
-   Serial.begin(115200);
-   Serial.println("Germinator!");
+   Serial.begin(9600);
+   Serial.println("Germinator v1.0!");
  
    dht.begin();
    lcd.begin(16,2);   
 }
 
 void loop() {
-	delay(5000);
+	
 	 
 	// Lecture de l'hygrométrie
-	float humidityValue = dht.readHumidity();
+	float humidity = dht.readHumidity();
 	 
 	// Lecture de la température en °C
-	float temparatureValue = dht.readTemperature();
+	float temperature = dht.readTemperature();
 
 	// Lecture capteur moisture
-	int moistureSensor = analogRead(0);
-	
+        //analogWrite(MOISTUREPIN, HIGH);
+	int moistureSensor = analogRead(MOISTUREPIN);
+	//analogWrite(MOISTUREPIN, LOW);
+
 	// Lecture capteur water
-	int waterSensor = analogRead(1);
+	int waterSensor = analogRead(WATERPIN);
 
 
 	//On verifie si la lecture a echoue, si oui on quitte la boucle pour recommencer.
-	if (isnan(h) || isnan(t) ) {
-		Serial.print("h:");Serial.println(h);
-		Serial.println("Failed to read data!");
-		return;
+	if (isnan(humidity) || isnan(temperature) ) {
+	  //Serial.print("h:");Serial.println(humidity);
+	  Serial.println("Failed to read data!");
+	  return;
 	}
 	
 	// Affichage LCD
 	
 	lcd.setCursor(0,0);                                               // placement du curseur 1ére ligne
 	lcd.print("H:");
-	lcd.print(h);
+	lcd.print(humidity);
 	lcd.print("% ");
 	lcd.print("T:");
-	lcd.print(t);
+	lcd.print(temperature);
 		
 	lcd.setCursor(0,1);                                               // placement du curseur 2ème ligne
 	lcd.print("M:");
@@ -80,22 +88,20 @@ void loop() {
 	//delay(100);
 	//Affichages :
 	Serial.print("Hum: ");
-	Serial.print(h);
+	Serial.print(humidity);
 	Serial.print("%\t");
 	Serial.print("Temp: ");
-	Serial.print(t);
+	Serial.print(temperature);
 	Serial.print("C\t");
 	Serial.print("Mois: ");
-	Serial.println(m);
+	Serial.println(moistureSensor);
 	
 	Serial.print("Niveau: ");
-	Serial.println(water);
+	Serial.println(waterSensor);
 	
-	/*
-	if(t > 20)
-	 digitalWrite(13,HIGH);
-	else
-	 digitalWrite(13, LOW);
-	*/
-	 
+       // LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF);
+       delay(10000);
+       lcd.noDisplay();
+        delay(50000);
+
 }
